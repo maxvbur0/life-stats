@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stats</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="título">
+        <h1>
+            Stats do Gooz
+        </h1>
+    </div>
+    <div id="itens">
+        <!-- aqui, pesquisar como usar jakyll e fazer um for loop
+            pra iterar os itens, usando essa estruturinha aqui embaixo-->
+        {{% for item in site.stats %}}
+        <div>
+            <div class="item">
+                {{ item.name }}
+            </div>
+            <div class="count">
+                {{ item.count }}
+            </div>
+        </div>
+        {{% endfor %}}
+    </div>
+</html>
