@@ -8,26 +8,64 @@ layout: none
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Stats</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Gloock&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div id="título">
-        <h1>
-            Stats do Gooz
-        </h1>
-    </div>
-    <div id="itens">
-        <!-- aqui, pesquisar como usar jakyll e fazer um for loop
-            pra iterar os itens, usando essa estruturinha aqui embaixo-->
-        {{% for item in site.stats %}}
-        <div>
-            <div class="item">
-                {{ item.name }}
-            </div>
-            <div class="count">
-                {{ item.count }}
-            </div>
-        </div>
-        {{% endfor %}}
-    </div>
+    <main class="page">
+        <header class="page__header">
+            <h1 class="title">Stats do Gooz</h1>
+            <p class="subtitle">AAAAARRRGHHHH</p>
+        </header>
+
+        <section id="stats" class="stats" aria-live="polite">
+            <div class="stat stat--placeholder">Loading stats…</div>
+        </section>
+    </main>
+
+    <script>
+    async function loadStats() {
+        const container = document.getElementById('stats');
+
+        try {
+            const response = await fetch('stats.json', { cache: 'no-store' });
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+
+            const data = await response.json();
+
+            if (!Array.isArray(data) || data.length === 0) {
+                container.textContent = 'No stats available right now.';
+                return;
+            }
+
+            container.innerHTML = '';
+
+            data.forEach(({ name, value }) => {
+                const row = document.createElement('div');
+                row.className = 'stat';
+
+                const label = document.createElement('div');
+                label.className = 'stat__label';
+                label.textContent = name || '—';
+
+                const number = document.createElement('div');
+                number.className = 'stat__value';
+                number.textContent = value ?? '0';
+
+                row.appendChild(label);
+                row.appendChild(number);
+                container.appendChild(row);
+            });
+        } catch (error) {
+            container.textContent = 'Unable to load stats.';
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', loadStats);
+    </script>
+</body>
 </html>
