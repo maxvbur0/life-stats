@@ -1,14 +1,57 @@
-[
-  {
-    "name": "Visitas",
-    "value": 1000
-  },
-  {
-    "name": "Postagens",
-    "value": 5
-  },
-  {
-    "name": "Contatos",
-    "value": 3
-  }
-]
+{
+  "lastUpdated": "2026-01-29T12:00:00Z",
+  "stats": [
+    {
+      "id": "days_alive",
+      "name": "Days Alive",
+      "value": 10000,
+      "description": "Total days since birth"
+    },
+    {
+      "id": "books_read",
+      "name": "Books Read",
+      "value": 42,
+      "description": "Books completed this year"
+    },
+    {
+      "id": "workout_days",
+      "name": "Workout Days",
+      "value": 150,
+      "description": "Days exercised this year"
+    },
+    {
+      "id": "total_days",
+      "name": "Days This Year",
+      "value": 365
+    },
+    {
+      "name": "Workout Rate",
+      "formula": "(workout_days / total_days) * 100",
+      "format": "percentage",
+      "description": "Percentage of days worked out"
+    },
+    {
+      "name": "Average Books/Month",
+      "formula": "books_read / 12",
+      "format": "decimal",
+      "description": "Monthly reading rate"
+    },
+    {
+      "id": "savings",
+      "name": "Savings",
+      "value": 5000,
+      "description": "Total savings in USD"
+    },
+    {
+      "id": "income",
+      "name": "Monthly Income",
+      "value": 3000
+    },
+    {
+      "name": "Savings Rate",
+      "formula": "(savings / (income * 12)) * 100",
+      "format": "percentage",
+      "description": "Percentage of yearly income saved"
+    }
+  ]
+}

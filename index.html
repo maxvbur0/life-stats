@@ -6,18 +6,18 @@ layout: none
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stats</title>
+    <meta name="viewport" content="width=600, initial-scale=1.0">
+    <title>Life Stats Tracker</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Gloock&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <main class="page">
         <header class="page__header">
-            <h1 class="title">Stats do Gooz</h1>
-            <p class="subtitle">AAAAARRRGHHHH</p>
+            <h1 class="title">Life Stats</h1>
+            <p class="subtitle">Personal Tracking Dashboard</p>
         </header>
 
         <section id="stats" class="stats" aria-live="polite">
@@ -26,6 +26,32 @@ layout: none
     </main>
 
     <script>
+    // Formula evaluator with safety checks
+    function evaluateFormula(formula, variables) {
+        try {
+            // Replace variable names with their values
+            let expression = formula;
+            for (const [key, val] of Object.entries(variables)) {
+                const regex = new RegExp('\\b' + key + '\\b', 'g');
+                expression = expression.replace(regex, val);
+            }
+            
+            // Only allow safe math operations
+            const safeExpression = expression.replace(/[^0-9+\-*/(). ]/g, '');
+            return Function('"use strict"; return (' + safeExpression + ')')();
+        } catch (e) {
+            return 'Error';
+        }
+    }
+
+    function formatValue(value, format) {
+        if (value === 'Error') return value;
+        if (format === 'percentage') return value.toFixed(1) + '%';
+        if (format === 'decimal') return value.toFixed(2);
+        if (format === 'integer') return Math.round(value);
+        return value;
+    }
+
     async function loadStats() {
         const container = document.getElementById('stats');
 
@@ -37,31 +63,70 @@ layout: none
 
             const data = await response.json();
 
-            if (!Array.isArray(data) || data.length === 0) {
+            if (!data.stats || data.stats.length === 0) {
                 container.textContent = 'No stats available right now.';
                 return;
             }
 
+            // Build variables map from all stats
+            const variables = {};
+            data.stats.forEach(stat => {
+                if (stat.value !== undefined) {
+                    variables[stat.id || stat.name] = stat.value;
+                }
+            });
+
             container.innerHTML = '';
 
-            data.forEach(({ name, value }) => {
+            data.stats.forEach(stat => {
                 const row = document.createElement('div');
                 row.className = 'stat';
 
                 const label = document.createElement('div');
                 label.className = 'stat__label';
-                label.textContent = name || '—';
+                label.textContent = stat.name || '—';
 
-                const number = document.createElement('div');
-                number.className = 'stat__value';
-                number.textContent = value ?? '0';
+                const valueDiv = document.createElement('div');
+                valueDiv.className = 'stat__value';
+                
+                let displayValue;
+                if (stat.formula) {
+                    // Evaluate formula
+                    const result = evaluateFormula(stat.formula, variables);
+                    displayValue = formatValue(result, stat.format);
+                } else {
+                    // Use direct value
+                    displayValue = stat.value ?? '0';
+                    if (stat.format) {
+                        displayValue = formatValue(displayValue, stat.format);
+                    }
+                }
+                
+                valueDiv.textContent = displayValue;
+
+                // Add description if present
+                if (stat.description) {
+                    const desc = document.createElement('div');
+                    desc.className = 'stat__description';
+                    desc.textContent = stat.description;
+                    label.appendChild(desc);
+                }
 
                 row.appendChild(label);
-                row.appendChild(number);
+                row.appendChild(valueDiv);
                 container.appendChild(row);
             });
+
+            // Add last updated timestamp if present
+            if (data.lastUpdated) {
+                const updated = document.createElement('div');
+                updated.className = 'last-updated';
+                updated.textContent = 'Last updated: ' + new Date(data.lastUpdated).toLocaleString();
+                container.appendChild(updated);
+            }
         } catch (error) {
             container.textContent = 'Unable to load stats.';
+            console.error('Error loading stats:', error);
         }
     }
 
