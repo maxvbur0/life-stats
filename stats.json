@@ -1,11 +1,22 @@
 {
   "lastUpdated": "2026-01-29T12:00:00Z",
+  "config": {
+    "birthDate": "1996-07-15",
+    "yearStart": "2026-01-01",
+    "trackingStart": "2026-01-01"
+  },
   "stats": [
     {
-      "id": "days_alive",
       "name": "Days Alive",
-      "value": 10000,
+      "formula": "days_since('birthDate')",
+      "format": "integer",
       "description": "Total days since birth"
+    },
+    {
+      "name": "Days This Year",
+      "formula": "days_since('yearStart')",
+      "format": "integer",
+      "description": "Days elapsed in current year"
     },
     {
       "id": "books_read",
@@ -20,19 +31,14 @@
       "description": "Days exercised this year"
     },
     {
-      "id": "total_days",
-      "name": "Days This Year",
-      "value": 365
-    },
-    {
       "name": "Workout Rate",
-      "formula": "(workout_days / total_days) * 100",
+      "formula": "(workout_days / days_since('yearStart')) * 100",
       "format": "percentage",
       "description": "Percentage of days worked out"
     },
     {
       "name": "Average Books/Month",
-      "formula": "books_read / 12",
+      "formula": "books_read / (days_since('yearStart') / 30.44)",
       "format": "decimal",
       "description": "Monthly reading rate"
     },
@@ -52,6 +58,12 @@
       "formula": "(savings / (income * 12)) * 100",
       "format": "percentage",
       "description": "Percentage of yearly income saved"
+    },
+    {
+      "name": "Days Until Year End",
+      "formula": "365 - days_since('yearStart')",
+      "format": "integer",
+      "description": "Days remaining this year"
     }
   ]
 }

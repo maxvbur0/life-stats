@@ -26,11 +26,31 @@ layout: none
     </main>
 
     <script>
-    // Formula evaluator with safety checks
-    function evaluateFormula(formula, variables) {
+    // Calculate days between two dates
+    function daysBetween(date1, date2) {
+        const oneDay = 24 * 60 * 60 * 1000;
+        return Math.round(Math.abs((date2 - date1) / oneDay));
+    }
+
+    // Formula evaluator with date support
+    function evaluateFormula(formula, variables, config) {
         try {
-            // Replace variable names with their values
             let expression = formula;
+            
+            // Handle days_since() function
+            expression = expression.replace(/days_since\('([^']+)'\)/g, (match, configKey) => {
+                if (config && config[configKey]) {
+                    const startDate = new Date(config[configKey]);
+                    const today = new Date();
+                    return daysBetween(startDate, today);
+                }
+                return 0;
+            });
+
+            // Handle today() function - returns current timestamp
+            expression = expression.replace(/today\(\)/g, Date.now());
+
+            // Replace variable names with their values
             for (const [key, val] of Object.entries(variables)) {
                 const regex = new RegExp('\\b' + key + '\\b', 'g');
                 expression = expression.replace(regex, val);
@@ -40,6 +60,7 @@ layout: none
             const safeExpression = expression.replace(/[^0-9+\-*/(). ]/g, '');
             return Function('"use strict"; return (' + safeExpression + ')')();
         } catch (e) {
+            console.error('Formula evaluation error:', e, formula);
             return 'Error';
         }
     }
@@ -91,8 +112,8 @@ layout: none
                 
                 let displayValue;
                 if (stat.formula) {
-                    // Evaluate formula
-                    const result = evaluateFormula(stat.formula, variables);
+                    // Evaluate formula with config support
+                    const result = evaluateFormula(stat.formula, variables, data.config);
                     displayValue = formatValue(result, stat.format);
                 } else {
                     // Use direct value
@@ -117,13 +138,11 @@ layout: none
                 container.appendChild(row);
             });
 
-            // Add last updated timestamp if present
-            if (data.lastUpdated) {
-                const updated = document.createElement('div');
-                updated.className = 'last-updated';
-                updated.textContent = 'Last updated: ' + new Date(data.lastUpdated).toLocaleString();
-                container.appendChild(updated);
-            }
+            // Add last updated timestamp - show current time since calculations are dynamic
+            const updated = document.createElement('div');
+            updated.className = 'last-updated';
+            updated.textContent = 'Calculated: ' + new Date().toLocaleString();
+            container.appendChild(updated);
         } catch (error) {
             container.textContent = 'Unable to load stats.';
             console.error('Error loading stats:', error);
